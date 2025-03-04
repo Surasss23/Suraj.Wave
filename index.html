@@ -1,32 +1,38 @@
-<!doctype html>
-<html lang="en-us">
+<!DOCTYPE html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Suraj.wave</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f0f0f0;
-            margin: 0;
-            padding: 0;
+            background-color: #121212;
+            color: white;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             height: 100vh;
+            margin: 0;
         }
         .chat-container {
-            width: 350px;
-            background: #fff;
+            width: 90%;
+            max-width: 400px;
+            background: #1e1e1e;
             border-radius: 10px;
-            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            padding: 10px;
             overflow: hidden;
+            display: flex;
+            flex-direction: column;
         }
         .header {
-            background: #007bff;
-            color: white;
-            padding: 10px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 20px;
+            font-weight: bold;
             text-align: center;
-            font-size: 18px;
+            padding: 10px 0;
+            border-bottom: 2px solid #444;
         }
         .chat-box {
             height: 400px;
@@ -36,41 +42,40 @@
             flex-direction: column;
         }
         .message {
-            padding: 8px 12px;
-            border-radius: 10px;
-            margin: 5px 0;
-            max-width: 75%;
+            max-width: 80%;
+            padding: 8px;
+            border-radius: 8px;
+            margin: 5px;
         }
         .sent {
-            align-self: flex-end;
             background: #007bff;
-            color: white;
+            align-self: flex-end;
         }
         .received {
+            background: #444;
             align-self: flex-start;
-            background: #e5e5e5;
-            color: black;
         }
-        .input-box {
+        .input-container {
             display: flex;
             padding: 10px;
-            background: #fff;
+            border-top: 2px solid #444;
         }
-        .input-box textarea {
-            flex: 1;
+        textarea {
+            flex-grow: 1;
+            resize: none;
+            padding: 8px;
             border: none;
             border-radius: 5px;
-            padding: 8px;
-            resize: none;
-            height: 40px;
+            background: #333;
+            color: white;
         }
-        .input-box button {
+        button {
             margin-left: 5px;
             padding: 10px;
             border: none;
+            border-radius: 5px;
             background: #007bff;
             color: white;
-            border-radius: 5px;
             cursor: pointer;
         }
     </style>
@@ -79,68 +84,38 @@
     <div class="chat-container">
         <div class="header">Suraj.wave</div>
         <div class="chat-box" id="chatBox"></div>
-        <div class="input-box">
-            <textarea id="txData" placeholder="Type a message..."></textarea>
+        <div class="input-container">
+            <textarea id="txData" rows="2" placeholder="Type a message..."></textarea>
             <button onclick="onSend();">Send</button>
         </div>
     </div>
 
-    <script type="text/javascript" src="ggwave.js"></script>
-    <script type='text/javascript'>
-        window.AudioContext = window.AudioContext || window.webkitAudioContext;
-        var context = new AudioContext({sampleRate: 48000});
-        var ggwave = null;
-        var instance = null;
-
-        ggwave_factory().then(obj => {
-            ggwave = obj;
-            let parameters = ggwave.getDefaultParameters();
-            parameters.sampleRateInp = context.sampleRate;
-            parameters.sampleRateOut = context.sampleRate;
-            instance = ggwave.init(parameters);
-        });
-
-        function onSend() {
-            let message = document.getElementById("txData").value;
-            if (message.trim() === "") return;
-            addMessage(message, 'sent');
-            document.getElementById("txData").value = "";
-            let waveform = ggwave.encode(instance, message, ggwave.ProtocolId.GGWAVE_PROTOCOL_AUDIBLE_FAST, 10);
-            let buf = new Float32Array(waveform);
-            let buffer = context.createBuffer(1, buf.length, context.sampleRate);
-            buffer.getChannelData(0).set(buf);
-            let source = context.createBufferSource();
-            source.buffer = buffer;
-            source.connect(context.destination);
-            source.start(0);
-        }
-
+    <script src="ggwave.js"></script>
+    <script>
+        let chatBox = document.getElementById("chatBox");
+        let txData = document.getElementById("txData");
+        
         function addMessage(text, type) {
-            let chatBox = document.getElementById("chatBox");
-            let messageDiv = document.createElement("div");
-            messageDiv.className = "message " + type;
-            messageDiv.textContent = text;
-            chatBox.appendChild(messageDiv);
+            let msgDiv = document.createElement("div");
+            msgDiv.classList.add("message", type);
+            msgDiv.textContent = text;
+            chatBox.appendChild(msgDiv);
             chatBox.scrollTop = chatBox.scrollHeight;
         }
-
-        function startListening() {
-            navigator.mediaDevices.getUserMedia({audio: true}).then(stream => {
-                let mediaStream = context.createMediaStreamSource(stream);
-                let recorder = context.createScriptProcessor(1024, 1, 1);
-                recorder.onaudioprocess = function (e) {
-                    let source = e.inputBuffer;
-                    let res = ggwave.decode(instance, new Int8Array(source.getChannelData(0)));
-                    if (res && res.length > 0) {
-                        res = new TextDecoder("utf-8").decode(res);
-                        addMessage(res, 'received');
-                    }
-                };
-                mediaStream.connect(recorder);
-                recorder.connect(context.destination);
-            });
+        
+        function onSend() {
+            let text = txData.value.trim();
+            if (text) {
+                addMessage(text, "sent");
+                txData.value = "";
+                playGGWave(text);
+            }
         }
-        startListening();
+        
+        function playGGWave(message) {
+            // Placeholder for GGWave sound generation logic
+            console.log("Playing GGWave sound for message: ", message);
+        }
     </script>
 </body>
 </html>
