@@ -1,0 +1,150 @@
+/* General Styles */
+body {
+    font-family: 'Source Code Pro', monospace;
+    background: #000;
+    color: #00ff00; /* Hacker green */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+/* Chat Container */
+.chat-container {
+    width: 100%;
+    max-width: 500px;
+    background: #111;
+    border-radius: 8px;
+    padding: 20px;
+    box-sizing: border-box;
+    border: 1px solid #333;
+}
+
+/* Chat Header */
+.chat-header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.chat-header h1 {
+    font-size: 2rem;
+    margin: 0;
+    color: #00ff00;
+}
+
+.chat-header p {
+    font-size: 0.9rem;
+    color: #00cc00;
+    margin: 5px 0 0;
+}
+
+/* Chat Box */
+.chat-box {
+    height: 300px;
+    overflow-y: auto;
+    background: #000;
+    border-radius: 8px;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #333;
+}
+
+/* Chat Messages */
+.message {
+    padding: 8px 12px;
+    margin: 5px 0;
+    border-radius: 5px;
+    font-size: 0.9rem;
+}
+
+.message.sent {
+    background: #002200;
+    color: #00ff00;
+    align-self: flex-end;
+    text-align: right;
+}
+
+.message.received {
+    background: #111;
+    color: #00ff00;
+    align-self: flex-start;
+    text-align: left;
+}
+
+/* Chat Input */
+.chat-input {
+    display: flex;
+    gap: 10px;
+}
+
+.chat-input textarea {
+    width: 100%;
+    height: 60px;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #333;
+    background: #000;
+    color: #00ff00;
+    resize: none;
+    font-family: 'Source Code Pro', monospace;
+}
+
+.chat-input textarea::placeholder {
+    color: #00cc00;
+}
+
+.chat-input button {
+    width: 80px;
+    height: 60px;
+    border: none;
+    border-radius: 5px;
+    background: #002200;
+    color: #00ff00;
+    font-family: 'Source Code Pro', monospace;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.chat-input button:hover {
+    background: #004400;
+}
+
+/* Scrollbar */
+.chat-box::-webkit-scrollbar {
+    width: 5px;
+}
+
+.chat-box::-webkit-scrollbar-track {
+    background: #000;
+}
+
+.chat-box::-webkit-scrollbar-thumb {
+    background: #00cc00;
+    border-radius: 5px;
+}
+
+/* Responsive Design */
+@media (max-width: 600px) {
+    .chat-container {
+        width: 90%;
+        padding: 15px;
+    }
+
+    .chat-header h1 {
+        font-size: 1.5rem;
+    }
+
+    .chat-box {
+        height: 200px;
+    }
+
+    .chat-input textarea {
+        height: 50px;
+    }
+
+    .chat-input button {
+        width: 70px;
+        height: 50px;
+    }
+}
