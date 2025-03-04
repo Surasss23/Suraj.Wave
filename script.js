@@ -12,9 +12,12 @@ var instance = null;
 var txData = document.getElementById("txData");
 var chatBox = document.getElementById("chat-box");
 
+// Initialize ggwave
 ggwave_factory().then(function(obj) {
     ggwave = obj;
     init();
+}).catch(function(err) {
+    console.error("Failed to load ggwave:", err);
 });
 
 function convertTypedArray(src, type) {
@@ -25,44 +28,50 @@ function convertTypedArray(src, type) {
 
 function init() {
     if (!context) {
-        context = new AudioContext({sampleRate: 48000});
+        context = new AudioContext({ sampleRate: 48000 });
         parameters = ggwave.getDefaultParameters();
         parameters.sampleRateInp = context.sampleRate;
         parameters.sampleRateOut = context.sampleRate;
         instance = ggwave.init(parameters);
 
         // Start microphone capture
-        navigator.mediaDevices.getUserMedia({ audio: true }).then(function (stream) {
-            mediaStream = context.createMediaStreamSource(stream);
-            var bufferSize = 1024;
-            var numberOfInputChannels = 1;
-            var numberOfOutputChannels = 1;
+        navigator.mediaDevices.getUserMedia({ audio: true })
+            .then(function(stream) {
+                mediaStream = context.createMediaStreamSource(stream);
+                var bufferSize = 1024;
+                var numberOfInputChannels = 1;
+                var numberOfOutputChannels = 1;
 
-            recorder = context.createScriptProcessor(bufferSize, numberOfInputChannels, numberOfOutputChannels);
-            recorder.onaudioprocess = function (e) {
-                var source = e.inputBuffer;
-                var res = ggwave.decode(instance, convertTypedArray(new Float32Array(source.getChannelData(0)), Int8Array));
+                recorder = context.createScriptProcessor(bufferSize, numberOfInputChannels, numberOfOutputChannels);
+                recorder.onaudioprocess = function(e) {
+                    var source = e.inputBuffer;
+                    var audioData = new Float32Array(source.getChannelData(0));
+                    var res = ggwave.decode(instance, convertTypedArray(audioData, Int8Array));
 
-                if (res && res.length > 0) {
-                    res = new TextDecoder("utf-8").decode(res);
-                    var messageElement = document.createElement("div");
-                    messageElement.className = "message received";
-                    messageElement.textContent = res;
-                    chatBox.appendChild(messageElement);
-                    chatBox.scrollTop = chatBox.scrollHeight; // Auto-scroll to bottom
-                }
-            };
+                    if (res && res.length > 0) {
+                        res = new TextDecoder("utf-8").decode(res);
+                        var messageElement = document.createElement("div");
+                        messageElement.className = "message received";
+                        messageElement.textContent = res;
+                        chatBox.appendChild(messageElement);
+                        chatBox.scrollTop = chatBox.scrollHeight; // Auto-scroll to bottom
+                    }
+                };
 
-            mediaStream.connect(recorder);
-            recorder.connect(context.destination);
-        }).catch(function (e) {
-            console.error("Microphone access denied:", e);
-        });
+                mediaStream.connect(recorder);
+                recorder.connect(context.destination);
+            })
+            .catch(function(err) {
+                console.error("Microphone access denied:", err);
+            });
     }
 }
 
 function onSend() {
-    if (!context) return;
+    if (!context || !ggwave || !instance) {
+        console.error("Audio context or ggwave not initialized.");
+        return;
+    }
 
     var waveform = ggwave.encode(instance, txData.value, ggwave.ProtocolId.GGWAVE_PROTOCOL_AUDIBLE_FAST, 10);
     var buf = convertTypedArray(waveform, Float32Array);
